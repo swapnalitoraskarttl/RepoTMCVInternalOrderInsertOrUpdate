@@ -3,27 +3,24 @@
     xmlns:cxf="http://camel.apache.org/schema/cxf"
     xmlns:http-conf="http://cxf.apache.org/transports/http/configuration"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="          http://www.springframework.org/schema/beans           http://www.springframework.org/schema/beans/spring-beans.xsd            http://camel.apache.org/schema/cxf           http://camel.apache.org/schema/cxf/camel-cxf.xsd                http://camel.apache.org/schema/spring                 http://camel.apache.org/schema/spring/camel-spring.xsd                http://cxf.apache.org/transports/http/configuration     http://cxf.apache.org/schemas/configuration/http-conf.xsd">
-
-	<cxf:cxfEndpoint
+    <cxf:cxfEndpoint
         address="http://localhost:8087/TMCVInternalOrderInsertOrUpdate" id="CRP_API">
         <cxf:properties>
             <entry key="dataFormat" value="MESSAGE"/>
         </cxf:properties>
     </cxf:cxfEndpoint>
-    
-     <cxf:cxfEndpoint
-        address="http://172.24.47.117//eai_secure_enu/start.swe?SWEExtSource=SecureWebService&amp;SWEExtCmd=Execute"
-        id="rsAPI">
+    <cxf:cxfEndpoint
+        address="http://172.24.47.117//eai_secure_enu/start.swe?SWEExtSource=SecureWebService&amp;SWEExtCmd=Execute" id="rsAPI">
         <cxf:properties>
             <entry key="dataFormat" value="MESSAGE"/>
         </cxf:properties>
     </cxf:cxfEndpoint>
-	
-
-    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:asi="http://siebel.com/asi/" xmlns:ord="http://www.siebel.com/xml/Order%20Interface">
+    <camelContext id="camel"
+        xmlns="http://camel.apache.org/schema/spring"
+        xmlns:asi="http://siebel.com/asi/"
+        xmlns:ord="http://www.siebel.com/xml/Order%20Interface" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
         <route id="simple-route">
-            <from id="route-timer"  uri="cxf:bean:CRP_API?loggingFeatureEnabled=true"/>
-            
+            <from id="route-timer" uri="cxf:bean:CRP_API?loggingFeatureEnabled=true"/>
             <setHeader headerName="OrderType" id="OrderType">
                 <xpath>//asi:TMCVInternalOrderInsertOrUpdate_Input/ord:ListOfOrderInterface/ord:Orders/ord:OrderType/text()</xpath>
             </setHeader>
@@ -68,9 +65,9 @@
             </setHeader>
             <setHeader headerName="RequestedQuantity" id="RequestedQuantity">
                 <xpath>//asi:TMCVInternalOrderInsertOrUpdate_Input/ord:ListOfOrderInterface/ord:Orders/ord:ListOfLineItems/ord:LineItems/ord:RequestedQuantity/text()</xpath>
-             </setHeader>
+            </setHeader>
             <setHeader headerName="LineItemsIntegrationId" id="LineItemsIntegrationId">
-                <xpath>//asi:TMCVInternalOrderInsertOrUpdate_Input/ord:ListOfOrderInterface/ord:Orders/ord:ListOfLineItems/ord:LineItems/ord:IntegrationId/text()</xpath>            
+                <xpath>//asi:TMCVInternalOrderInsertOrUpdate_Input/ord:ListOfOrderInterface/ord:Orders/ord:ListOfLineItems/ord:LineItems/ord:IntegrationId/text()</xpath>
             </setHeader>
             <setHeader headerName="OrderTypeId" id="OrderTypeId">
                 <xpath>//asi:TMCVInternalOrderInsertOrUpdate_Input/ord:ListOfOrderInterface/ord:Orders/ord:OrderTypeId/text()</xpath>
@@ -87,15 +84,20 @@
             <setHeader headerName="Authorization" id="_setHeader2">
                 <simple>Basic Vk1BMDcxMzQ6VEFUQTIwMTU=</simple>
             </setHeader>
-            
             <setBody id="route-setBodyCRM">
                 <simple>
             &lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:asi="http://siebel.com/asi/" xmlns:ord="http://www.siebel.com/xml/Order%20Interface"&gt;
-   &lt;soapenv:Header/&gt;
+    &lt;soapenv:Header&gt;
+      &lt;wsse:Security xmlns:wsse="http://schemas.xmlsoap.org/ws/2002/07/secext"&gt;
+         &lt;wsse:UsernameToken xmlns:wsu="http://schemas.xmlsoap.org/ws/2002/07/utility"&gt;
+            &lt;wsse:Username>TMCVPRDADMIN&lt;/wsse:Username&gt;
+            &lt;wsse:Password Type="wsse:PasswordText">stmcvprdadmin&lt;/wsse:Password&gt;
+         &lt;/wsse:UsernameToken&gt;
+      &lt;/wsse:Security&gt;
+&lt;/soapenv:Header&gt;
    &lt;soapenv:Body&gt;
       &lt;asi:TMCVInternalOrderInsertOrUpdate_Input&gt;
          &lt;ord:ListOfOrderInterface&gt;
-            &lt;!--Zero or more repetitions:--&gt;
             &lt;ord:Orders operation=""&gt;
                &lt;ord:ParentProductLine&gt;&lt;/ord:ParentProductLine&gt;
                &lt;ord:ProductAMC&gt;&lt;/ord:ProductAMC&gt;
@@ -364,8 +366,7 @@
    &lt;/soapenv:Body&gt;
 &lt;/soapenv:Envelope&gt;
  </simple>
-			</setBody> 
-            
+            </setBody>
             <log id="route-log" message=">>> ${body}"/>
             <to id="_to3" pattern="InOut" uri="cxf:bean:rsAPI"/>
         </route>
